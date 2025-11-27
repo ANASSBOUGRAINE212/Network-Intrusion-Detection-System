@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Attack Detection System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo"> CyberGuard</div>
+            <ul class="nav-menu">
+                <li><a href="#model">Model Info</a></li>
+                <li><a href="visualizations.html">Visualizations</a></li>
+                <li><a href="predict.html">Test Model</a></li>
+            </ul>
+            <a href="https://github.com" target="_blank" class="github-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+            </a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="hero landing-hero">
+            <div class="hero-content">
+                <h1><span class="highlight">Cyber Attack</span><br><span class="subheading">Detection System</span></h1>
+                <p>Real-time network intrusion detection powered by advanced machine learning. Identify and classify 15
+                    different types of cyber attacks with high accuracy using our Wide & Deep Neural Network trained on
+                    the CICIDS2017 dataset.</p>
+                <a href="visualizations.html" class="btn-learn-more">Explore Dashboard</a>
+                <a href="predict.html" class="btn-learn-more" style="background: var(--dark-blue); color: #fff;">Test
+                    Model</a>
+            </div>
+            <div class="hero-illustration">
+                <!-- Placeholder SVG illustration -->
+                <svg width="360" height="220" viewBox="0 0 360 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="30" width="320" height="170" rx="16" fill="#d3fcfc" />
+                    <rect x="37" y="48" width="286" height="52" rx="8" fill="#fff" />
+                    <rect x="37" y="108" width="202" height="22" rx="6" fill="#5ad2e7" />
+                    <rect x="37" y="138" width="130" height="15" rx="5" fill="#c0f3f7" />
+                    <rect x="243" y="138" width="80" height="32" rx="8" fill="#f9a826" />
+                    <rect x="57" y="162" width="80" height="18" rx="5" fill="#fea82f" />
+                    <rect x="145" y="162" width="60" height="18" rx="5" fill="#f9a826" />
+                    <!-- Human icons as placeholder -->
+                    <circle cx="85" cy="65" r="10" fill="#5ad2e7" />
+                    <circle cx="290" cy="170" r="9" fill="#764ba2" />
+                    <circle cx="310" cy="60" r="7" fill="#283a55" />
+                </svg>
+            </div>
+        </section>
+
+        <section class="attack-types" id="attacks"></section>
+        <h2>Detected Cyber Attack Types</h2>
+
+        <div class="attack-card normal">
+            <h3>✅ BENIGN</h3>
+            <p>Legitimate network traffic from authorized users and systems. Normal communication patterns without
+                malicious intent.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>🤖 Bot</h3>
+            <p>Automated malicious software that performs tasks remotely. Often part of a botnet used for DDoS
+                attacks, spam, or data theft.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>🔴 DDoS</h3>
+            <p>Distributed Denial of Service - coordinated attack from multiple sources to overwhelm a target system
+                with traffic.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>💥 DoS GoldenEye</h3>
+            <p>HTTP DoS attack that sends legitimate-looking requests to exhaust server resources. Targets web
+                servers specifically.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>💥 DoS Hulk</h3>
+            <p>HTTP Unbearable Load King - generates unique obfuscated traffic to bypass caching and overwhelm web
+                servers.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>💥 DoS Slowhttptest</h3>
+            <p>Slow HTTP attack that sends partial requests to keep connections open and exhaust server resources
+                over time.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>💥 DoS slowloris</h3>
+            <p>Keeps many connections to the target web server open by sending partial HTTP requests, preventing
+                legitimate connections.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>🔓 FTP-Patator</h3>
+            <p>Brute force attack targeting FTP services. Attempts multiple username/password combinations to gain
+                unauthorized access.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>💔 Heartbleed</h3>
+            <p>Exploits a vulnerability in OpenSSL to read sensitive data from server memory, including passwords
+                and encryption keys.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>🕵️ Infiltration</h3>
+            <p>Stealthy attack where an attacker gains unauthorized access and moves laterally through the network
+                to steal data.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>🔍 PortScan</h3>
+            <p>Reconnaissance attack that scans network ports to identify open services and potential
+                vulnerabilities for exploitation.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>🔓 SSH-Patator</h3>
+            <p>Brute force attack targeting SSH services. Systematically tries different credentials to gain shell
+                access.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>🌐 Web Attack - Brute Force</h3>
+            <p>Automated attempts to guess login credentials on web applications through repeated trial and error.
+            </p>
+        </div>
+
+        <div class="attack-card">
+            <h3>💉 Web Attack - SQL Injection</h3>
+            <p>Injects malicious SQL code into web forms to manipulate databases, steal data, or gain unauthorized
+                access.</p>
+        </div>
+
+        <div class="attack-card">
+            <h3>⚠️ Web Attack - XSS</h3>
+            <p>Cross-Site Scripting - injects malicious scripts into web pages viewed by other users to steal data
+                or hijack sessions.</p>
+        </div>
+        </section>
+
+        <section class="model-info" id="model"></section>
+        <h2>About Our Model</h2>
+        <p>This system uses a Wide & Deep Neural Network trained on the CICIDS2017 dataset to detect and classify 15
+            different types of cyber attacks in real-time. The model analyzes 65 network traffic features including:
+        </p>
+        <ul style="margin-top: 1rem; line-height: 2;">
+            <li><strong>Temporal Features:</strong> Hour, minute, second (when the traffic occurred)</li>
+            <li><strong>Flow Features:</strong> Flow duration, IAT (Inter-Arrival Time) statistics</li>
+            <li><strong>Packet Statistics:</strong> Packet lengths, sizes, and distributions</li>
+            <li><strong>Flow Metrics:</strong> Bytes/s, Packets/s, forward/backward ratios</li>
+            <li><strong>TCP Flags:</strong> SYN, ACK, FIN, PSH, RST, URG flags</li>
+            <li><strong>Connection Patterns:</strong> Active/Idle times, subflow statistics</li>
+        </ul>
+        <p style="margin-top: 1rem;">The model achieves high accuracy in distinguishing between benign traffic and
+            various attack patterns, making it suitable for real-time network intrusion detection systems.</p>
+        </section>
+    </main>
+
+</body>
+
+</html>

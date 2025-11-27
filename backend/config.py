@@ -1,0 +1,39 @@
+# Configuration file for the Cyber Attack Detection API
+
+# Server Configuration
+HOST = '0.0.0.0'  # Listen on all interfaces
+PORT = 5000       # API server port
+DEBUG = True      # Set to False in production
+
+# Model Configuration
+# Using models from src/models/deep learning/ directory
+MODEL_DIR = '../src/models/deep learning'
+MODEL_FILE = 'best_dl_model_wide_and_deep.keras'
+SCALER_DIR = '../scaler-features'
+SCALER_FILE = 'dl_scaler.pkl'
+FEATURES_FILE = 'dl_feature_names.pkl'
+METADATA_FILE = 'dl_model_metadata.pkl'
+
+# CORS Configuration
+CORS_ORIGINS = '*'  # Allow all origins (restrict in production)
+
+# Attack Classes (default if not in metadata)
+DEFAULT_CLASSES = [
+    'BENIGN',
+    'Bot',
+    'DDoS',
+    'DoS GoldenEye',
+    'DoS Hulk',
+    'DoS Slowhttptest',
+    'DoS slowloris',
+    'FTP-Patator',
+    'Heartbleed',
+    'Infiltration',
+    'PortScan',
+    'SSH-Patator',
+    'Web Attack - Brute Force',
+    'Web Attack - Sql Injection',
+    'Web Attack - XSS'
+]
+
+
