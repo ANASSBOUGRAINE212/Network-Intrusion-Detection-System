@@ -1,0 +1,11 @@
+# Ignore system files and directories
+$Recycle.Bin/
+System Volume Information/
+hiberfil.sys
+pagefile.sys
+swapfile.sys
+DumpStack.log
+DumpStack.log.tmp
+Program Files/
+Program Files (x86)/
+ProgramData/
