@@ -1,4 +1,4 @@
-const API_URL = 'https://network-intrusion-detection-sys-production.up.railway.app';  // Replace with your actual Railway URL
+const API_URL = 'https://network-intrusion-detection-and-classification-s-production.up.railway.app';
 
 // Load model info and features on page load
 document.addEventListener('DOMContentLoaded', async () => {
