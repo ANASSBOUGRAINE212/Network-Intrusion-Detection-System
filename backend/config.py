@@ -1,9 +1,10 @@
 # Configuration file for the Cyber Attack Detection API
 
 # Server Configuration
+import os
 HOST = '0.0.0.0'  # Listen on all interfaces
-PORT = 5000       # API server port
-DEBUG = True      # Set to False in production
+PORT = int(os.environ.get('PORT', 5000))  # Use Render's PORT env variable
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'  # Set to False in production
 
 # Model Configuration
 # Using models from src/models/deep learning/ directory
