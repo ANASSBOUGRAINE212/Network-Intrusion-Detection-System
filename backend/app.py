@@ -49,7 +49,14 @@ def load_model_files():
         # Load the main deep learning model
         model_path = os.path.join(model_dir, config.MODEL_FILE)
         print(f"Loading main model from: {model_path}")
-        model = tf.keras.models.load_model(model_path)
+        # Use compile=False to avoid optimizer issues
+        model = tf.keras.models.load_model(model_path, compile=False)
+        # Recompile with current Keras version
+        model.compile(
+            optimizer='adam',
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
         print(f"✓ Main model loaded successfully")
         
         # Load the main scaler
@@ -86,7 +93,14 @@ def load_model_files():
             # Load rare classes DL model
             rare_model_path = os.path.join(rare_model_dir, 'best_dl_rare_wide_and_deep_rare.keras')
             print(f"\nLoading rare classes model from: {rare_model_path}")
-            rare_model = tf.keras.models.load_model(rare_model_path)
+            # Use compile=False to avoid optimizer issues
+            rare_model = tf.keras.models.load_model(rare_model_path, compile=False)
+            # Recompile with current Keras version
+            rare_model.compile(
+                optimizer='adam',
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy']
+            )
             print(f"✓ Rare classes model loaded successfully")
             
             # Load rare classes scaler
