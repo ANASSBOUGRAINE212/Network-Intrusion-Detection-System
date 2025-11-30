@@ -560,6 +560,7 @@ function createProbabilityChart() {
 
 ## 📁 Project Structure
 
+```bash
 Network-Intrusion-Detection-System/
 │
 ├── backend/                          # Flask API Backend
