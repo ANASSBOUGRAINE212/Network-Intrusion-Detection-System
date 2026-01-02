@@ -10,7 +10,7 @@ This project implements an end-to-end machine learning pipeline for cyber attack
 - **Classes**: 15 (1 benign + 14 attack types)
 - **Best Model**: Wide & Deep Neural Network
 - **Performance**: 99.28% F1-Score, 98.11% Accuracy
-- **Deployment**: Live on Railway (backend) + Netlify (frontend)
+
 
 ## 🛠️ Tech Stack
 
@@ -38,18 +38,11 @@ This project implements an end-to-end machine learning pipeline for cyber attack
 - Jupyter Notebook (ML experimentation)
 - Git (Version control)
 
-## 🌐 Live Demo
-
-**Frontend**: https://network-intrusion-detection-sys.netlify.app  
-**Backend API**: https://network-intrusion-detection-and-classification-s-production.up.railway.app
-
 
 ## 🚀 Quick Start
 
-### Option 1: Use Live Demo (Recommended)
-Just visit the live demo URL above - no installation needed!
 
-### Option 2: Run Locally
+### Run Locally
 
 **1. Install Dependencies**
 ```bash
