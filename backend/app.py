@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import os
+import threading
 import config
 
 # Try to import sklearn (required for unpickling scaler)
@@ -30,6 +31,69 @@ rare_scaler = None
 rare_feature_names = None
 rare_metadata = None
 rare_classes = [1, 8, 9, 12, 13, 14]  # Bot, Heartbleed, Infiltration, Web attacks
+
+# Auto-retrain flag
+is_retraining = False
+
+def auto_retrain_model():
+    """Background function to retrain model after each prediction"""
+    global model, metadata, is_retraining
+    
+    if is_retraining:
+        print("⚠ Retraining already in progress, skipping...")
+        return
+    
+    is_retraining = True
+    print(f"\n{'='*50}")
+    print(f"🔄 AUTO-RETRAIN: Training Wide & Deep with latest data")
+    print(f"{'='*50}")
+    
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        dataset_path = os.path.join(base_dir, '../data/preprocessed_dataset.csv')
+        
+        if not os.path.exists(dataset_path):
+            print("✗ No dataset found for retraining")
+            is_retraining = False
+            return
+        
+        df = pd.read_csv(dataset_path)
+        print(f"📊 Loaded {len(df)} samples for retraining")
+        
+        X = df[feature_names]
+        y = df['Label'].values.astype(np.int32)
+        X_scaled = scaler.transform(X).astype(np.float32)
+        
+        n_features = len(feature_names)
+        n_classes = len(config.DEFAULT_CLASSES)
+        
+        from tensorflow import keras
+        from tensorflow.keras import layers
+        
+        input_layer = layers.Input(shape=(n_features,))
+        deep = layers.Dense(128, activation='relu')(input_layer)
+        deep = layers.Dropout(0.3)(deep)
+        deep = layers.Dense(64, activation='relu')(deep)
+        deep = layers.Dropout(0.3)(deep)
+        wide = layers.Dense(32, activation='relu')(input_layer)
+        combined = layers.concatenate([deep, wide])
+        output = layers.Dense(n_classes, activation='softmax')(combined)
+        
+        new_model = keras.Model(inputs=input_layer, outputs=output)
+        new_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        
+        history = new_model.fit(X_scaled, y, epochs=20, batch_size=256, validation_split=0.2, verbose=1)
+        
+        model = new_model
+        
+        final_accuracy = history.history['accuracy'][-1]
+        print(f"✅ Auto-retrain complete! Accuracy: {final_accuracy*100:.2f}%")
+        print(f"{'='*50}\n")
+        
+    except Exception as e:
+        print(f"✗ Auto-retrain failed: {e}")
+    finally:
+        is_retraining = False
 
 def load_model_files():
     global model, scaler, feature_names, metadata
@@ -722,6 +786,40 @@ def predict():
         
         predicted_class = classes[predicted_class_idx] if predicted_class_idx < len(classes) else f'Class_{predicted_class_idx}'
         
+        # Get actual label if provided
+        actual_label = data.get('actual_label', '')
+        
+        # AUTO-SAVE: Append to preprocessed_dataset.csv
+        label_to_save_str = actual_label if actual_label else predicted_class
+        label_to_idx = {label: idx for idx, label in enumerate(classes)}
+        label_to_save = label_to_idx.get(label_to_save_str, predicted_class_idx)
+        
+        auto_saved = False
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            dataset_path = os.path.join(base_dir, '../data/preprocessed_dataset.csv')
+            
+            row_data = features_dict.copy()
+            row_data['Label'] = label_to_save
+            new_row = pd.DataFrame([row_data])
+            
+            if os.path.exists(dataset_path):
+                existing_df = pd.read_csv(dataset_path, nrows=0)
+                new_row = new_row.reindex(columns=existing_df.columns, fill_value=0)
+                new_row.to_csv(dataset_path, mode='a', header=False, index=False)
+            else:
+                new_row.to_csv(dataset_path, mode='w', header=True, index=False)
+            
+            auto_saved = True
+            
+            # Trigger auto-retrain in background
+            if not is_retraining:
+                retrain_thread = threading.Thread(target=auto_retrain_model)
+                retrain_thread.start()
+                
+        except Exception as save_error:
+            print(f"Warning: Could not auto-save: {save_error}")
+        
         # Create probabilities dictionary
         probabilities = {classes[i]: float(predictions[0][i]) for i in range(len(predictions[0]))}
         
@@ -729,8 +827,15 @@ def predict():
             'predicted_class': predicted_class,
             'confidence': confidence,
             'probabilities': probabilities,
-            'raw_predictions': predictions[0].tolist()
+            'raw_predictions': predictions[0].tolist(),
+            'auto_saved': auto_saved,
+            'label_saved': f'{label_to_save_str} ({label_to_save})'
         }
+        
+        # Add actual label comparison
+        if actual_label:
+            response['actual_label'] = actual_label
+            response['is_correct'] = actual_label == predicted_class
         
         # Add ensemble info if used
         if ensemble_used:
@@ -751,6 +856,177 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/upload-data', methods=['POST'])
+def upload_data():
+    """Upload CSV data for retraining"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        if not file.filename.endswith('.csv'):
+            return jsonify({'error': 'Only CSV files are supported'}), 400
+        
+        # Read the uploaded CSV
+        df = pd.read_csv(file)
+        
+        # Validate columns
+        missing_features = [f for f in feature_names if f not in df.columns]
+        if missing_features:
+            return jsonify({
+                'error': 'Missing required features',
+                'missing': missing_features[:10],
+                'total_missing': len(missing_features)
+            }), 400
+        
+        # Check for label column
+        label_col = None
+        for col in ['Label', 'label', 'Class', 'class', 'Attack', 'attack']:
+            if col in df.columns:
+                label_col = col
+                break
+        
+        if label_col is None:
+            return jsonify({
+                'error': 'No label column found. Expected: Label, Class, or Attack'
+            }), 400
+        
+        # Save uploaded data
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        upload_path = os.path.join(base_dir, '../data/uploaded_training_data.csv')
+        df.to_csv(upload_path, index=False)
+        
+        # Get class distribution
+        class_counts = df[label_col].value_counts().to_dict()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Data uploaded successfully',
+            'rows': len(df),
+            'features': len(df.columns),
+            'label_column': label_col,
+            'class_distribution': class_counts
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/retrain', methods=['POST'])
+def retrain_model():
+    """Retrain the model by merging uploaded data with main dataset"""
+    global model, metadata
+    
+    try:
+        data = request.get_json() or {}
+        epochs = data.get('epochs', 10)
+        batch_size = data.get('batch_size', 32)
+        
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        upload_path = os.path.join(base_dir, '../data/uploaded_training_data.csv')
+        main_dataset_path = os.path.join(base_dir, '../data/preprocessed_dataset.csv')
+        
+        if not os.path.exists(upload_path):
+            return jsonify({'error': 'No training data uploaded. Please upload data first.'}), 400
+        
+        # Load uploaded data
+        uploaded_df = pd.read_csv(upload_path)
+        
+        # Find label column
+        label_col = None
+        for col in ['Label', 'label', 'Class', 'class', 'Attack', 'attack']:
+            if col in uploaded_df.columns:
+                label_col = col
+                break
+        
+        if label_col is None:
+            return jsonify({'error': 'No label column found in uploaded data'}), 400
+        
+        if label_col != 'Label':
+            uploaded_df = uploaded_df.rename(columns={label_col: 'Label'})
+        
+        # Load main dataset and merge
+        if os.path.exists(main_dataset_path):
+            main_df = pd.read_csv(main_dataset_path)
+            df = pd.concat([main_df, uploaded_df], ignore_index=True)
+            print(f"📊 Combined dataset: {len(df)} rows")
+        else:
+            df = uploaded_df
+        
+        # Prepare features and labels
+        X = df[feature_names]
+        y_raw = df['Label'].values
+        
+        # Encode labels
+        classes = config.DEFAULT_CLASSES
+        y = []
+        for label in y_raw:
+            try:
+                label_int = int(label)
+                if 0 <= label_int < len(classes):
+                    y.append(label_int)
+                    continue
+            except (ValueError, TypeError):
+                pass
+            # String label lookup
+            label_to_idx = {l: i for i, l in enumerate(classes)}
+            y.append(label_to_idx.get(label, 0))
+        
+        y = np.array(y)
+        
+        # Scale features
+        X_scaled = scaler.transform(X).astype(np.float32)
+        y = y.astype(np.int32)
+        
+        # Build Wide & Deep model
+        n_features = len(feature_names)
+        n_classes = len(classes)
+        
+        from tensorflow import keras
+        from tensorflow.keras import layers
+        
+        input_layer = layers.Input(shape=(n_features,))
+        deep = layers.Dense(128, activation='relu')(input_layer)
+        deep = layers.Dropout(0.3)(deep)
+        deep = layers.Dense(64, activation='relu')(deep)
+        deep = layers.Dropout(0.3)(deep)
+        wide = layers.Dense(32, activation='relu')(input_layer)
+        combined = layers.concatenate([deep, wide])
+        output = layers.Dense(n_classes, activation='softmax')(combined)
+        
+        new_model = keras.Model(inputs=input_layer, outputs=output)
+        new_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        
+        # Train
+        import tensorflow as tf
+        X_tensor = tf.constant(X_scaled, dtype=tf.float32)
+        y_tensor = tf.constant(y, dtype=tf.int32)
+        
+        history = new_model.fit(X_tensor, y_tensor, epochs=epochs, batch_size=batch_size, validation_split=0.2, verbose=1)
+        
+        model = new_model
+        
+        final_accuracy = history.history['accuracy'][-1]
+        val_accuracy = history.history.get('val_accuracy', [0])[-1]
+        
+        metadata['last_retrained'] = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        return jsonify({
+            'success': True,
+            'message': 'Model retrained successfully',
+            'epochs': epochs,
+            'samples': len(df),
+            'final_accuracy': float(final_accuracy),
+            'val_accuracy': float(val_accuracy)
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/', methods=['GET'])
 def index():
     """Root endpoint"""
@@ -765,6 +1041,12 @@ def index():
             'predict': '/predict (POST)'
         }
     })
+
+@app.route('/classes', methods=['GET'])
+def get_classes():
+    """Get list of attack classes"""
+    classes = metadata.get('classes', config.DEFAULT_CLASSES) if metadata else config.DEFAULT_CLASSES
+    return jsonify({'classes': classes})
 
 @app.route('/health', methods=['GET'])
 def health_check():
