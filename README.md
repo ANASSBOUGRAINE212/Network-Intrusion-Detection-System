@@ -21,7 +21,6 @@ This project implements an end-to-end machine learning pipeline for cyber attack
 - scikit-learn 1.3.2 (Preprocessing)
 - NumPy 1.26.4 (Numerical computing)
 - Pandas 2.1.4 (Data manipulation)
-- Gunicorn 21.2.0 (Production server)
 
 **Frontend:**
 - HTML5 + CSS3 (Modern dark theme)
@@ -38,27 +37,7 @@ This project implements an end-to-end machine learning pipeline for cyber attack
 - Jupyter Notebook (ML experimentation)
 - Git (Version control)
 
-
-## 🚀 Quick Start
-
-
-### Run Locally
-
-**1. Install Dependencies**
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-**2. Start Backend Server**
-```bash
-python app.py
-```
-
-**3. Open Frontend**
-Open `index.html` in your browser
-
-**4. Test the System**
+**Test the System**
 1. Navigate to "Test Model" page
 2. Click any sample button (e.g., "🔴 DDoS")
 3. Click "Predict Attack Type"
@@ -736,83 +715,12 @@ The Jupyter notebook (`notebook/Network Intrusion Detection Classification syste
 **Platform**: Railway (https://railway.app)  
 **URL**: https://network-intrusion-detection-and-classification-s-production.up.railway.app
 
-**Setup:**
-1. Connect GitHub repository
-2. Set root directory: `backend`
-3. Railway auto-detects Python and installs dependencies
-4. Models loaded from `backend/models/` and `backend/scaler-features/`
-5. Gunicorn serves Flask app on port 8080
-
-**Configuration Files:**
-- `Procfile`: `web: gunicorn app:app`
-- `railway.json`: Build and deploy settings
-- `runtime.txt`: Python 3.11.0
-- `requirements.txt`: All dependencies including TensorFlow 2.17 + Keras 3.6
-
-**Environment Variables:**
-- `PORT`: Auto-set by Railway
-- `TF_ENABLE_ONEDNN_OPTS`: 0 (disable warnings)
-- `KERAS_BACKEND`: tensorflow
-
-**Auto-Deploy:**
-- Push to `main` branch → Railway rebuilds automatically
-- Build time: ~2 minutes
-- Zero downtime deployments
-
 ### Frontend Deployment (Netlify)
 
 **Platform**: Netlify (https://netlify.com)  
 **URL**: https://network-intrusion-detection-sys.netlify.app
 
-**Setup:**
-1. Connect GitHub repository
-2. Branch: `main`
-3. Publish directory: `.` (root)
-4. No build command needed (static site)
 
-**Configuration:**
-- `netlify.toml`: Redirect rules for SPA
-- API URL in `js/app.js` points to Railway backend
-- CORS configured in `backend/config.py`
-
-**Auto-Deploy:**
-- Push to `main` branch → Netlify rebuilds automatically
-- Build time: ~30 seconds
-- Global CDN distribution
-
-### Deployment Workflow
-
-```bash
-# Make changes locally
-git add .
-git commit -m "Your changes"
-git push origin main
-
-### Monitoring & Logs
-
-**Railway:**
-- Dashboard: https://railway.app/dashboard
-- View logs: Click service → Logs tab
-- Check metrics: CPU, memory, network usage
-
-**Netlify:**
-- Dashboard: https://app.netlify.com
-- Deploy logs: Site → Deploys tab
-- Analytics: Site → Analytics
-
-### Testing with Sample Data
-
-1. Open `frontend/index.html` in your browser
-2. Click "Test Model" in the navigation
-3. Click any sample button (e.g., "🔴 DDoS")
-4. All 65 fields populate with real DDoS sample
-5. Click "Predict Attack Type" (yellow button)
-6. View results with:
-   - Predicted class and confidence
-   - Model badge (Main or Rare)
-   - Ensemble system status
-   - **Interactive pie charts** showing probabilities
-   - Color-coded legends with percentages
 
 ### API Usage (Python)
 
